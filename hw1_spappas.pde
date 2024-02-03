@@ -53,7 +53,8 @@ void draw(){
   
   x = 0.0;
   barwidth = width/60; 
-   for (TableRow row : table.rows()) {
+  drawKey();
+  for (TableRow row : table.rows()) {
      String country = row.getString("country");
      if (country.equals("USA")){
        grp = row.getFloat("grp_pc_usd");
@@ -123,3 +124,27 @@ void highlightBar(){
    }
    //add in text information about the highlighted year at mouseX and mouseY
 }
+void drawKey(){
+  fill(color(30,100,250));
+  rectMode(CENTER);
+  rect(width/5, 90, 20,20);
+  fill(color(230,30,30));
+  rect(2*width/5, 90, 20,20);
+  fill(color(30,230,30));
+  rect(3*width/5, 90, 20,20);
+  fill(0);
+  textSize(17);
+  text("Agriculture", 3*width/5+20, 90);
+  text("Manufacturing", 2*width/5+20, 90);
+  text("Services", width/5+20, 90);
+  rectMode(CORNERS);
+}
+
+//make color key
+//make text on demand
+//title, axes, axis titles
+//make "select a state"
+//make a true value, not 'per capita' option
+//make other visualiation with a button to change
+
+//potentially change fonts?
