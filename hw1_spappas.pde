@@ -32,25 +32,15 @@ void setup() {
   size(1000, 800);
   background(255);
   textSize = 12;
+  //table = loadTable("DOSE_V2.csv", "header");
   table = loadTable("DOSE_V2.csv", "header");
-  int numRows = table.getRowCount();
-  for (int i = 0; i < usStates.length; i++) {
-    float xPos = map(i % (usStates.length / 2), 0, usStates.length / 2, 0, width - 100);
-    float yPos = map(i / (usStates.length / 2), 0, 2, 0, height / 10);
-    
-    textAlign(TOP, CENTER);
-    fill(0);
-    if (i == hoveredStateIndex) {
-      fill(200, 200, 0); // Highlight color when hovered
-    }
-    text(usStates[i], xPos + 50, yPos + 20);
-  }
-  
-  stroke(0);
 }
 
 void draw(){
-  
+  background(255);
+  textSize = 12;
+  stateAbbs();
+   
   x = 0.0;
   barwidth = width/60; 
   drawKey();
@@ -69,8 +59,9 @@ void draw(){
          float mappedAg = map(ag, 0, 100000, 0, height-50);
          float mappedMan = map(man, 0, 100000, 0, height-50);
          float mappedServ = map(services, 0, 100000, 0, height-50);
-  
-         fill(200,200,200);
+         int year = row.getInt("year");
+         //println(year);
+         //fill(200,200,200);
          rectMode(CORNERS);
          //rect(x,height,x+barwidth,height-mappedGRP);
          fill(color(30,100,250));
@@ -82,11 +73,16 @@ void draw(){
          fill(color(30,230,30));
          highlightBar();
          rect(x, height-mappedServ-mappedMan, x+barwidth, height-mappedMan-mappedServ-mappedAg);
+         //textAtMouse(year);
        }   
      }
    }
-  
 }
+
+/*void textAtMouse(int year){
+    fill(0);
+    text(year, mouseX + 20, mouseY -20);
+}*/
 
 void mouseMoved() {
   // Check if the mouse is over any state
@@ -115,15 +111,29 @@ void mousePressed() {
       noStroke();
       rect(0,100,width, height);
       stroke(0);
-    
+  }
+  if (mouseX>x && mouseX<x+barwidth){
+    for (TableRow row : table.rows()) {
+       String country = row.getString("country");
+       if (country.equals("USA")){
+          grp = row.getFloat("grp_pc_usd");
+          ag = row.getFloat("ag_grp_pc_usd");
+          man =  row.getFloat("man_grp_pc_usd");
+          services =  row.getFloat("serv_grp_pc_usd");
+       }
+    }
+    text(grp + " " + ag + " " + man,mouseX, mouseY);
   }
 }
+
 void highlightBar(){
   if (mouseX >= x && mouseX < x+barwidth){
          fill(20, 200, 200);
    }
-   //add in text information about the highlighted year at mouseX and mouseY
+   //fill(0);
+    
 }
+
 void drawKey(){
   fill(color(30,100,250));
   rectMode(CENTER);
@@ -140,7 +150,26 @@ void drawKey(){
   rectMode(CORNERS);
 }
 
-//make color key
+void stateAbbs() { //draws the state abreviations at the top
+   textSize = 12;
+   
+  //table = loadTable("DOSE_V2.csv", "header");
+  for (int i = 0; i < usStates.length; i++) {
+    float xPos = map(i % (usStates.length / 2), 0, usStates.length / 2, 0, width - 100);
+    float yPos = map(i / (usStates.length / 2), 0, 2, 0, height / 10);
+    
+    textAlign(TOP, CENTER);
+    fill(0);
+    if (i == hoveredStateIndex) {
+      fill(30, 130, 250); // Highlight color when hovered
+    }
+    text(usStates[i], xPos + 50, yPos + 20);
+  }
+  
+  stroke(0); 
+}
+
+//DONEmake color key
 //make text on demand
 //title, axes, axis titles
 //make "select a state"
