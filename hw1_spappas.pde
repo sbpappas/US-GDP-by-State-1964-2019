@@ -25,7 +25,8 @@ String[] usStatesLong = {
 int hoveredStateIndex = -1; // -1 indicates no hover
 String clickedState = "";
 int textSize;
-//color highlightFill = color(0);
+int hoveredYear = -1; // Initialize hoveredYear to -1
+
 
 
 void setup() {
@@ -34,10 +35,13 @@ void setup() {
   textSize = 12;
   //table = loadTable("DOSE_V2.csv", "header");
   table = loadTable("DOSE_V2.csv", "header");
+  
 }
 
 void draw(){
   background(255);
+  fill(0);
+  text("Pick a state from above!", 400,760);
   textSize = 12;
   stateAbbs();
    
@@ -60,8 +64,12 @@ void draw(){
          float mappedMan = map(man, 0, 100000, 0, height-50);
          float mappedServ = map(services, 0, 100000, 0, height-50);
          int year = row.getInt("year");
-         //println(year);
-         //fill(200,200,200);
+         
+         if (mouseX >= x && mouseX < x + barwidth) {
+          fill(0);
+          text(year, mouseX + 20, mouseY -20);
+         }
+         
          rectMode(CORNERS);
          //rect(x,height,x+barwidth,height-mappedGRP);
          fill(color(30,100,250));
@@ -73,16 +81,11 @@ void draw(){
          fill(color(30,230,30));
          highlightBar();
          rect(x, height-mappedServ-mappedMan, x+barwidth, height-mappedMan-mappedServ-mappedAg);
-         //textAtMouse(year);
        }   
      }
    }
+   
 }
-
-/*void textAtMouse(int year){
-    fill(0);
-    text(year, mouseX + 20, mouseY -20);
-}*/
 
 void mouseMoved() {
   // Check if the mouse is over any state
@@ -130,7 +133,6 @@ void highlightBar(){
   if (mouseX >= x && mouseX < x+barwidth){
          fill(20, 200, 200);
    }
-   //fill(0);
     
 }
 
