@@ -27,8 +27,7 @@ int hoveredStateIndex = -1; // -1 indicates no hover
 String clickedState = "";
 int textSize;
 int hoveredYear = -1; // Initialize hoveredYear to -1
-
-
+int animationCount;
 
 void setup() {
   size(1000, 800);
@@ -42,9 +41,11 @@ void setup() {
 void draw(){
   background(255);
   if (stage == "start"){
+     animationCount = 0;
      fill(0);
      textSize(30);
      textAlign(CENTER);
+     rectMode(CORNER);
      text("Choose your visualization of US GDP by state from 1964-2019", width/2, height/6);
      fill(250, 200, 200);
      rect(.5 * width/4, height/4, 300, 300);
@@ -55,6 +56,10 @@ void draw(){
      fill(0);
      text("Animation", 160 + 2*width/4, 150 + height/4);
      
+  }
+  if (stage == "animation"){
+      animationSetup();
+      animate();
   }
   
   if (stage == "bar"){
@@ -105,6 +110,10 @@ void draw(){
            text("Time: 1964-2019", width/2, height-11);
            textAlign(LEFT);
            text("GRP Per Capita", 20, 140);
+           text("$66,000", 15, (height-130)/4 +90);
+           text("$44,000", 15, 2*(height-130)/4 +90);
+           text("$22,000", 15, 3*(height-130)/4 +90);
+           
            
            
            
@@ -123,9 +132,11 @@ void draw(){
        }
      }
   }
-  
-  if (stage == "animation"){
-    
+}
+
+void keyPressed() {
+  if (key == 'b' || key == 'B') {
+    stage = "start";
   }
 }
 
@@ -156,28 +167,30 @@ void mousePressed() {
      stage = "bar";
     }
   }
-  
-  if (hoveredStateIndex != -1) {
-      clickedState = usStatesLong[hoveredStateIndex];
-      //println("Clicked on: " + clickedState);
-      fill(255);
-      noStroke();
-      rect(0,100,width, height);
-      stroke(0);
-  }
-  if (mouseX>x && mouseX<x+barwidth){
-    for (TableRow row : table.rows()) {
-       String country = row.getString("country");
-       if (country.equals("USA")){
-          grp = row.getFloat("grp_pc_usd");
-          ag = row.getFloat("ag_grp_pc_usd");
-          man =  row.getFloat("man_grp_pc_usd");
-          services =  row.getFloat("serv_grp_pc_usd");
-       }
+  if (stage == "bar"){
+    if (hoveredStateIndex != -1) {
+        clickedState = usStatesLong[hoveredStateIndex];
+        //println("Clicked on: " + clickedState);
+        fill(255);
+        noStroke();
+        rect(0,100,width, height);
+        stroke(0);
     }
-    text(grp + " " + ag + " " + man,mouseX, mouseY);
+    if (mouseX>x && mouseX<x+barwidth){
+      for (TableRow row : table.rows()) {
+         String country = row.getString("country");
+         if (country.equals("USA")){
+            grp = row.getFloat("grp_pc_usd");
+            ag = row.getFloat("ag_grp_pc_usd");
+            man =  row.getFloat("man_grp_pc_usd");
+            services =  row.getFloat("serv_grp_pc_usd");
+         }
+      }
+      text(grp + " " + ag + " " + man,mouseX, mouseY);
+    }
   }
 }
+
 
 void highlightBar(){ //hgihlights bar when hovered over
   if (mouseX >= x && mouseX < x+barwidth){
@@ -195,6 +208,7 @@ void drawKey(){ //draws the color key for bar chart
   rect(3*width/5, 90, 20,20);
   fill(0);
   textSize(17);
+  textAlign(TOP, CENTER);
   text("Agriculture", 3*width/5+20, 90);
   text("Manufacturing", 2*width/5+20, 90);
   text("Services", width/5+20, 90);
@@ -214,9 +228,55 @@ void stateAbbs() { //draws the state abreviations at the top
     }
     text(usStates[i], xPos + 50, yPos + 20);
   }
-  
+  textAlign(CENTER);
+  textSize(24);
+  text("USA Gross Regional Product PER CAPITA by State 1964-2019", width/2, 150);
+  text(clickedState, width/2, 180);
+  textSize(12);
+  text("Press 'b' to go back", width/2, 210);
   stroke(0); 
 }
+
+void animationSetup(){
+  textSize(20);
+      textAlign(CENTER);
+      text("USA Gross Regional Product by State from 1964-2019", width/2, 30);
+      textSize(12);
+      text("Press 'b' to go back", width/2, 50);
+      text("percent of grp from servie industry on y, grp total on x", width/2, 200);
+      strokeWeight(5);
+      stroke(0);
+      line(40, height/5, 40, height-40);
+      line(40, height-40, width-70, height-40);
+      strokeWeight(2);
+      stroke(0, 90);
+      line(40, height/5, width-70, height/5);
+      line(40, (height - height/5 - 40)/4 + height/5, width-70, (height - height/5 - 40)/4 + height/5);
+      line(40, 2*(height - height/5 - 40)/4 + height/5, width-70, 2*(height - height/5 - 40)/4 + height/5);
+      line(40, 3*(height - height/5 - 40)/4 + height/5, width-70, 3*(height - height/5 - 40)/4 + height/5);
+}
+
+void animate(){
+  
+   for (int i = 1964; i < 2020; i++){
+       stroke(0);
+       textSize(50);
+       textAlign(CENTER);
+       text(i, width/2, height/2);
+     
+     for (TableRow row : table.rows()) {
+       String country = row.getString("country");
+       if (country.equals("USA")){
+         grp = row.getFloat("grp_pc_usd");
+         ag = row.getFloat("ag_grp_pc_usd");
+         man =  row.getFloat("man_grp_pc_usd");
+         services =  row.getFloat("serv_grp_pc_usd");
+         int year = row.getInt("year");
+       }
+     }
+   }
+}
+
 
 //DONEmake color key
 //DONE make a mode selector start page
