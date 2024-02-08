@@ -28,6 +28,10 @@ String clickedState = "";
 int textSize;
 int hoveredYear = -1; // Initialize hoveredYear to -1
 int animationCount;
+int currentIndex = 1964;
+int displayDuration = 333; // in milliseconds
+int lastDisplayTime;
+
 
 void setup() {
   size(1000, 800);
@@ -36,6 +40,7 @@ void setup() {
   //table = loadTable("DOSE_V2.csv", "header");
   table = loadTable("DOSE_V2.csv", "header");
   stage = "start";
+  lastDisplayTime = millis();
 }
 
 void draw(){
@@ -59,6 +64,7 @@ void draw(){
   }
   if (stage == "animation"){
       animationSetup();
+      animatedYears();
       animate();
   }
   
@@ -238,6 +244,7 @@ void stateAbbs() { //draws the state abreviations at the top
 }
 
 void animationSetup(){
+  fill(0);
   textSize(20);
       textAlign(CENTER);
       text("USA Gross Regional Product by State from 1964-2019", width/2, 30);
@@ -257,13 +264,6 @@ void animationSetup(){
 }
 
 void animate(){
-  
-   for (int i = 1964; i < 2020; i++){
-       stroke(0);
-       textSize(50);
-       textAlign(CENTER);
-       text(i, width/2, height/2);
-     
      for (TableRow row : table.rows()) {
        String country = row.getString("country");
        if (country.equals("USA")){
@@ -272,9 +272,36 @@ void animate(){
          man =  row.getFloat("man_grp_pc_usd");
          services =  row.getFloat("serv_grp_pc_usd");
          int year = row.getInt("year");
+         if (year == currentIndex){
+           fill(250, 30, 30);
+           if (year % 2 = 0){
+             ellipse(width/2, height/2, 100, 100);
+           }
+           else {
+             ellipse(width/2 - 200, height/2-200, 200, 200);
+           }
+         }
        }
      }
-   }
+   
+}
+
+void animatedYears(){
+  textAlign(CENTER, CENTER);
+      textSize(152);
+      fill(0, 100);
+      text(currentIndex, width/2, height/2);
+    
+      // Check if it's time to move on to the next entry
+      if (millis() - lastDisplayTime > displayDuration) {
+        currentIndex++;
+        lastDisplayTime = millis();
+    
+        // Reset the index when all entries are displayed
+        if (currentIndex >= 2020) {
+          currentIndex = 1964;
+        }
+      }
 }
 
 
