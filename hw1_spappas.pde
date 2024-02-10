@@ -65,15 +65,22 @@ void draw(){
      text("Choose your visualization of US GDP by state from 1964-2019", width/2, height/6 -50);
      fill(250, 200, 200);
      rectMode(CENTER);
+     if ((mouseX < width/4 +175) && (mouseX > width/4-175) && (mouseY <650) && mouseY >150){
+       fill(250,142, 247);
+     }
      rect(width/4, 400, 350, 500);
      //rect(.5 * width/4, height/4, 300, 300);
      fill(0);
      text("Bar chart", width/4, 400);
      fill(200, 200, 250);
      //rect(20+ 2* width/4, height/4, 300, 300);
+     if ((mouseX < 3*width/4 +175) && (mouseX > 3*width/4-175) && (mouseY <650) && mouseY >150){
+      fill(142,243,247);
+     }
      rect(3*width/4, 400, 350, 500);
      fill(0);
      text("Animation", 3*width/4, 400);
+     strokeWeight(1);
      
   }
   if (stage == "animation"){
@@ -179,7 +186,7 @@ void mouseMoved() {
   if (stage == "start"){
      if ((mouseX < width/4 +175) && (mouseX > width/4-175) && (mouseY <650) && mouseY >150){
        fill(0);
-       rect(200,200, 10,10);
+       //rect(200,200, 10,10);
      }
      else if ((mouseX < 3*width/4 +175) && (mouseX > 3*width/4-175) && (mouseY <650) && mouseY >150){
        
@@ -279,6 +286,7 @@ void stateAbbs() { //draws the state abreviations at the top
   text(clickedState, width/2, 180);
   textSize(12);
   text("Press 'b' to go back", width/2, 210);
+  text("Click on a bar to see more info", width/2, 230);
   stroke(0); 
 }
 
