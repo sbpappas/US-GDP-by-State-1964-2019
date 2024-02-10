@@ -50,22 +50,30 @@ void setup() {
 }
 
 void draw(){
-  background(255);
+  color startColor = color(191, 252, 242); 
+  color endColor = color(255, 253, 208); 
+
+  drawGradientBackground(startColor, endColor);
   if (stage == "start"){
      animationCount = 0;
      fill(0);
+     stroke(0);
+     strokeWeight(4);
      textSize(30);
      textAlign(CENTER);
      rectMode(CORNER);
-     text("Choose your visualization of US GDP by state from 1964-2019", width/2, height/6);
+     text("Choose your visualization of US GDP by state from 1964-2019", width/2, height/6 -50);
      fill(250, 200, 200);
-     rect(.5 * width/4, height/4, 300, 300);
+     rectMode(CENTER);
+     rect(width/4, 400, 350, 500);
+     //rect(.5 * width/4, height/4, 300, 300);
      fill(0);
-     text("Bar chart", 40 + width/4, 150 + height/4);
+     text("Bar chart", width/4, 400);
      fill(200, 200, 250);
-     rect(20+ 2* width/4, height/4, 300, 300);
+     //rect(20+ 2* width/4, height/4, 300, 300);
+     rect(3*width/4, 400, 350, 500);
      fill(0);
-     text("Animation", 160 + 2*width/4, 150 + height/4);
+     text("Animation", 3*width/4, 400);
      
   }
   if (stage == "animation"){
@@ -168,6 +176,15 @@ void keyPressed() {
 }
 
 void mouseMoved() {
+  if (stage == "start"){
+     if ((mouseX < width/4 +175) && (mouseX > width/4-175) && (mouseY <650) && mouseY >150){
+       fill(0);
+       rect(200,200, 10,10);
+     }
+     else if ((mouseX < 3*width/4 +175) && (mouseX > 3*width/4-175) && (mouseY <650) && mouseY >150){
+       
+     }
+  }
   // Check if the mouse is over any state
   hoveredStateIndex = -1;
   for (int i = 0; i < usStates.length; i++) {
@@ -376,34 +393,83 @@ boolean isMouseInsideCircle(float circleX, float circleY, float circleRadius) {
   return distance < circleRadius;
 }
 
-void pullStatsPage(){
-   background(0);
-   fill(255);
-   textSize(20);
-   textAlign(CENTER);
-   text("Press x to return to the graph", width/2, 50);
-   textSize(40);
-   text("Economic Breakdown of " + clickedState + " in " + yearTracker, width/2, 100);
-   for (TableRow row : table.rows()) {
-       String country = row.getString("country");
-       if (country.equals("USA")){
-         String region = row.getString("region");
-         if (region == clickedState){
-           int year = row.getInt("year");
-           if (year == yearTracker){
-             float s_grp = row.getFloat("grp_pc_usd");
-             float s_ag = row.getFloat("ag_grp_pc_usd");
-             float s_man =  row.getFloat("man_grp_pc_usd");
-             float s_services =  row.getFloat("serv_grp_pc_usd");
-             float i_grp = row.getFloat("grp_pc_usd"); //get the inflation adjusted values
-             float i_ag = row.getFloat("ag_grp_pc_usd");
-             float i_man =  row.getFloat("man_grp_pc_usd");
-             float i_services =  row.getFloat("serv_grp_pc_usd");
-             
-           }
-         }
-       }
-   }
+void pullStatsPage() {
+  color startColor = color(1, 75, 103); 
+  color endColor = color(79, 1, 103); 
+  drawGradientBackground(startColor, endColor);
+  fill(255);
+  textSize(20);
+  textAlign(CENTER);
+  text("Press x to return to the graph", width/2, 50);
+  textSize(40);
+  text("Economic Breakdown of " + clickedState + " in " + yearTracker, width/2, 100);
+
+  float tableX = width / 2 - 300; 
+  float tableY = 200;
+  float cellWidth = 200; 
+  float cellHeight = 40; 
+  float lineHeight = tableY + cellHeight;
+  textSize(18);
+  text("Category", tableX + cellWidth / 2, tableY);
+  text("Nominal Value", tableX + 3 * cellWidth / 2, tableY);
+  text("2015 Inflation Adjusted Values", tableX + 5 * cellWidth / 2, tableY);
+  textSize(14);
+  for (TableRow row : table.rows()) {
+    String country = row.getString("country");
+    if (country.equals("USA")) {
+      String region = row.getString("region");
+      if (region.equals(clickedState)) {
+        int year = row.getInt("year");
+        if (year == yearTracker) {
+          float s_grp = row.getFloat("grp_pc_usd");
+          float s_ag = row.getFloat("ag_grp_pc_usd");
+          float s_man = row.getFloat("man_grp_pc_usd");
+          float s_services = row.getFloat("serv_grp_pc_usd");
+          float i_grp = row.getFloat("grp_pc_usd_2015");
+          float i_ag = row.getFloat("ag_grp_pc_usd_2015");
+          float i_man = row.getFloat("man_grp_pc_usd_2015");
+          float i_services = row.getFloat("serv_grp_pc_usd_2015");
+
+          // Displaying data in a table
+          text("Total GRP", tableX + cellWidth / 2, lineHeight);
+          text(nf(s_grp, 0, 2), tableX + 3 * cellWidth / 2, lineHeight);
+          text(nf(i_grp, 0, 2), tableX + 5 * cellWidth / 2, lineHeight);
+
+          lineHeight += cellHeight;
+
+          text("GRP From Agriculture", tableX + cellWidth / 2, lineHeight);
+          text(nf(s_ag, 0, 2), tableX + 3 * cellWidth / 2, lineHeight);
+          text(nf(i_ag, 0, 2), tableX + 5 * cellWidth / 2, lineHeight);
+
+          lineHeight += cellHeight;
+
+          text("GRP From Manufacturing", tableX + cellWidth / 2, lineHeight);
+          text(nf(s_man, 0, 2), tableX + 3 * cellWidth / 2, lineHeight);
+          text(nf(i_man, 0, 2), tableX + 5 * cellWidth / 2, lineHeight);
+
+          lineHeight += cellHeight;
+
+          text("GRP From Services", tableX + cellWidth / 2, lineHeight);
+          text(nf(s_services, 0, 2), tableX + 3 * cellWidth / 2, lineHeight);
+          text(nf(i_services, 0, 2), tableX + 5 * cellWidth / 2, lineHeight);
+        }
+      }
+    }
+  }
+}
+
+void drawGradientBackground(color c1, color c2) {
+  for (int i = 0; i < height; i++) {
+    // Calculate the interpolation factor based on the vertical position
+    float inter = map(i, 0, height, 0, 1);
+
+    // Blend the two colors
+    color c = lerpColor(c1, c2, inter);
+
+    // Set the color and draw a horizontal line
+    stroke(c);
+    line(0, i, width, i);
+  }
 }
 
 //options: have a "adjusted for inflation" option on animation
