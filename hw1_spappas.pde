@@ -29,8 +29,14 @@ int textSize;
 int hoveredYear = -1; // Initialize hoveredYear to -1
 int animationCount;
 int currentIndex = 1964;
-int displayDuration = 333; // in milliseconds
+int frames = 300;
+int displayDuration = frames; // in milliseconds
 int lastDisplayTime;
+boolean paused = false;
+float circleX;
+float circleY;
+float mapped_grp;
+int yearTracker;
 
 
 void setup() {
@@ -67,6 +73,9 @@ void draw(){
       animatedYears();
       animate();
   }
+  if (stage == "stats"){
+    pullStatsPage();
+  }
   
   if (stage == "bar"){
     fill(0);
@@ -97,6 +106,7 @@ void draw(){
            if (mouseX >= x && mouseX < x + barwidth) {
             fill(0);
             text(year, mouseX + 20, mouseY -20);
+            yearTracker = year;
            }
            
            //draw axes here
@@ -121,8 +131,6 @@ void draw(){
            text("$22,000", 15, 3*(height-130)/4 +90);
            
            
-           
-           
            rectMode(CORNERS);
            //rect(x,height,x+barwidth,height-mappedGRP);
            fill(color(30,100,250));
@@ -143,6 +151,19 @@ void draw(){
 void keyPressed() {
   if (key == 'b' || key == 'B') {
     stage = "start";
+  }
+  if (key == 'p' || key == 'P'){
+    if (paused == false){
+       displayDuration = Integer.MAX_VALUE; 
+       paused = true;
+    }
+    else if (paused == true){
+      paused = false;
+      displayDuration = frames;
+    }
+  }
+  if (stage == "stats" && (key == 'x' || key == 'X')){
+     stage = "bar"; 
   }
 }
 
@@ -182,18 +203,15 @@ void mousePressed() {
         rect(0,100,width, height);
         stroke(0);
     }
-    if (mouseX>x && mouseX<x+barwidth){
-      for (TableRow row : table.rows()) {
-         String country = row.getString("country");
-         if (country.equals("USA")){
-            grp = row.getFloat("grp_pc_usd");
-            ag = row.getFloat("ag_grp_pc_usd");
-            man =  row.getFloat("man_grp_pc_usd");
-            services =  row.getFloat("serv_grp_pc_usd");
-         }
-      }
-      text(grp + " " + ag + " " + man,mouseX, mouseY);
+    if (mouseX>x && mouseX<x+barwidth && mouseY > height/3){
+      stage = "stats";
     }
+  }
+  if (stage == "animate"){
+     if (isMouseInsideCircle(circleX, circleY, mapped_grp)) {
+    fill(255, 0, 0); // Red color
+    text("Circle clicked!", 20, 20);
+  } 
   }
 }
 
@@ -201,7 +219,11 @@ void mousePressed() {
 void highlightBar(){ //hgihlights bar when hovered over
   if (mouseX >= x && mouseX < x+barwidth){
          fill(20, 200, 200);
-   }  
+         if (mousePressed && mouseY > height/2){
+            stage = "stats";
+         }
+   }
+   
 }
 
 void drawKey(){ //draws the color key for bar chart
@@ -250,13 +272,37 @@ void animationSetup(){
       text("USA Gross Regional Product by State from 1964-2019", width/2, 30);
       textSize(12);
       text("Press 'b' to go back", width/2, 50);
-      text("percent of grp from servie industry on y, grp total on x", width/2, 200);
+      text("Press 'p' to pause/play", width/2, 65);
+      textAlign(LEFT);
+      textSize(15);
+      text("% of GRP from Services", 20, height/5-20);
+      text("GRP Per Capita", 900, height-55);
+      text("80%", 8, height/5);
+      text("20%", 8, height-40);
+      text("50%", 8, 2*(height - height/5 - 40)/4 + height/5);
+      text("65%", 8, (height - height/5 - 40)/4 + height/5);
+      text("35%", 8, 3*(height - height/5 - 40)/4 + height/5);
+      //x-axis
+      textAlign(CENTER);
+      text("$100,000", 880, height-20);
+      text("$0", 40, height-20);
+      text("$25,000", 220, height-20);
+      text("$50,000", 440, height-20);
+      text("$75,000", 660, height-20);
+      //vert lines
+      
+      
       strokeWeight(5);
       stroke(0);
       line(40, height/5, 40, height-40);
       line(40, height-40, width-70, height-40);
       strokeWeight(2);
       stroke(0, 90);
+      line(880, height-40, 880, height/5);
+      line(660, height-40, 660, height/5);
+      line(440, height-40, 440, height/5);
+      line(220, height-40, 220, height/5);
+      
       line(40, height/5, width-70, height/5);
       line(40, (height - height/5 - 40)/4 + height/5, width-70, (height - height/5 - 40)/4 + height/5);
       line(40, 2*(height - height/5 - 40)/4 + height/5, width-70, 2*(height - height/5 - 40)/4 + height/5);
@@ -267,19 +313,28 @@ void animate(){
      for (TableRow row : table.rows()) {
        String country = row.getString("country");
        if (country.equals("USA")){
-         grp = row.getFloat("grp_pc_usd");
-         ag = row.getFloat("ag_grp_pc_usd");
-         man =  row.getFloat("man_grp_pc_usd");
-         services =  row.getFloat("serv_grp_pc_usd");
          int year = row.getInt("year");
          if (year == currentIndex){
-           fill(250, 30, 30);
-           if (year % 2 = 0){
-             ellipse(width/2, height/2, 100, 100);
-           }
-           else {
-             ellipse(width/2 - 200, height/2-200, 200, 200);
-           }
+           grp = row.getFloat("grp_pc_usd");
+           ag = row.getFloat("ag_grp_pc_usd");
+           man =  row.getFloat("man_grp_pc_usd");
+           services =  row.getFloat("serv_grp_pc_usd");
+           float pop = row.getFloat("pop");
+           String state = row.getString("region");
+           mapped_grp = map(grp, 0, 100000, 1, 70);
+           //float xAxis = map(pop, 0, 40000000, 0, 800);
+           //float xAxis = map(man/grp, 0, 1, 0, 800);
+           float xAxis = map(grp, 0, 90000, 0, 800);
+           float yAxis = map(services/grp, 0.2, 0.8, 0, 400);
+           fill(30, 200, 200, 100);
+           circleX = xAxis + 40;
+           circleY = height-40-yAxis;
+           ellipse(xAxis + 40, height-40-yAxis, mapped_grp, mapped_grp);
+           
+           textAlign(CENTER, CENTER);
+           textSize(12);
+           fill(0);
+           text(getStateIndex(state), xAxis + 40, height-40-yAxis);
          }
        }
      }
@@ -290,7 +345,7 @@ void animatedYears(){
   textAlign(CENTER, CENTER);
       textSize(152);
       fill(0, 100);
-      text(currentIndex, width/2, height/2);
+      text(currentIndex, width/2, height/4 + 25);
     
       // Check if it's time to move on to the next entry
       if (millis() - lastDisplayTime > displayDuration) {
@@ -304,13 +359,52 @@ void animatedYears(){
       }
 }
 
+String getStateIndex(String targetState) {
+  for (int i = 0; i < usStates.length; i++) {
+    if (usStatesLong[i].equals(targetState)) {
+      return usStates[i]; // Return the index when the target state is found
+    }
+  }
+  return "D.C.";
+}
 
-//DONEmake color key
-//DONE make a mode selector start page
-//make text on demand
-//title, axes, axis titles
-//make "select a state"
-//make a true value, not 'per capita' option
-//make other visualiation with a button to change
+boolean isMouseInsideCircle(float circleX, float circleY, float circleRadius) {
+  // Calculate the distance between the mouse position and the center of the circle
+  float distance = dist(mouseX, mouseY, circleX, circleY);
+  
+  // Check if the distance is less than the radius of the circle
+  return distance < circleRadius;
+}
 
-//potentially change fonts?
+void pullStatsPage(){
+   background(0);
+   fill(255);
+   textSize(20);
+   textAlign(CENTER);
+   text("Press x to return to the graph", width/2, 50);
+   textSize(40);
+   text("Economic Breakdown of " + clickedState + " in " + yearTracker, width/2, 100);
+   for (TableRow row : table.rows()) {
+       String country = row.getString("country");
+       if (country.equals("USA")){
+         String region = row.getString("region");
+         if (region == clickedState){
+           int year = row.getInt("year");
+           if (year == yearTracker){
+             float s_grp = row.getFloat("grp_pc_usd");
+             float s_ag = row.getFloat("ag_grp_pc_usd");
+             float s_man =  row.getFloat("man_grp_pc_usd");
+             float s_services =  row.getFloat("serv_grp_pc_usd");
+             float i_grp = row.getFloat("grp_pc_usd"); //get the inflation adjusted values
+             float i_ag = row.getFloat("ag_grp_pc_usd");
+             float i_man =  row.getFloat("man_grp_pc_usd");
+             float i_services =  row.getFloat("serv_grp_pc_usd");
+             
+           }
+         }
+       }
+   }
+}
+
+//options: have a "adjusted for inflation" option on animation
+//click on a bar and reveal more info
